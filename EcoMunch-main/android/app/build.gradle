@@ -1,0 +1,90 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+react {
+    autolinkLibrariesWithApp()
+}
+
+def enableProguardInReleaseBuilds = false
+def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+project.ext.react = [
+    enableHermes: true
+]
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+    namespace "com.EcoMunch"
+
+    defaultConfig {
+        applicationId "com.EcoMunch"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // Caution! In production, you need to generate your own keystore file.
+            // see https://reactnative.dev/docs/signed-apk-android.
+            signingConfig signingConfigs.debug
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    // Changed to match react-native-camera's flavor dimension
+    // flavorDimensions "react-native-camera"
+    // productFlavors {
+    //     mlkit {
+    //         dimension "react-native-camera"
+    //         matchingFallbacks = ['mlkit']
+    //     }
+    // }
+
+    // // This ensures compatibility with react-native-camera's flavors
+    // configurations.all {
+    //     resolutionStrategy {
+    //         dependencySubstitution {
+    //             // substitute project(path: ':react-native-camera') with project(path: ':react-native-camera', configuration: 'mlkitDebug')
+    //             // substitute module('com.some.dependency') using module('com.other.dependency:version')
+    //         }
+    //     }
+    // }
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+    // implementation 'com.google.mlkit:barcode-scanning:17.0.0'
+    // implementation project(':react-native-camera')
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+    implementation(project(":react-native-push-notification")) {
+    exclude group: "com.android.support"
+    }
+}
+
+// // Map the generic installDebug task to our specific flavor's task
+// tasks.register('installDebug') {
+//     dependsOn tasks.named('installMlkitDebug')
+// }
